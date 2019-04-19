@@ -1,5 +1,6 @@
 # v1.0
 # Выдае url для скачивания файла
+# Не забыть ввести логин и пароль
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,7 +18,7 @@ url = 'https://wiki.i-core.ru/pages/viewpage.action?pageId=10551321'
 s = requests.Session()
 s.post(url, headers=headers, data=data)
 a = s.get(url).text
-# print(a)
+#print(a.encode("utf-8"))  # Показать HTML страницы
 
 
 soup = BeautifulSoup(a, 'html.parser')
