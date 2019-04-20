@@ -1,5 +1,5 @@
 # v1.2
-# Выдае url для скачивания файла
+# Уже может качать файл
 # Не забыть ввести логин и пароль
 
 import requests
@@ -14,34 +14,42 @@ data = {'os_username': login,      # Логин
         'login': 'Войти',
         'os_destination': '/index.action',
         }
-url = 'https://wiki.i-core.ru/pages/viewpage.action?pageId=10551321'
+urls = ['https://wiki.i-core.ru/pages/viewpage.action?pageId=10551321',
+    'https://wiki.i-core.ru/pages/viewpage.action?pageId=2916492',
+    'https://wiki.i-core.ru/pages/viewpage.action?pageId=4456476',
+    ]
 
 
 def get_html(url, session):
-    return session.get(url).text                    # Возвращает html страницу
+    return session.get(url).text                        # Возвращает html страницу
 
 def get_pdf_link(html):
     soup = BeautifulSoup(html, 'html.parser')
     link = soup.find('a', id='action-export-pdf-link', href=True).get('href')
+    title = soup.find('h1', id='title-text').getText().split()
+    #print(title)
     #  print('url for download pdf -', 'https://wiki.i-core.ru' + link)
-    return 'https://wiki.i-core.ru' + link              # Возвращает url для скачивания PDF файла
+    return ['https://wiki.i-core.ru' + link, title]     # Возвращает url для скачивания PDF файла
 
-def download_file(url, session):
+def download_file(url, title, session):
     r = session.get(url, stream=True)
-    print(r.headers)
-    print(r.url)
+    #print(r.headers)
+    #print(r.url)
 
-    with open('1.pdf', 'wb') as f:
+    with open(f'{title}.pdf', 'wb') as f:
         for chunk in r.iter_content(8192):
             f.write(chunk)
 
 def main():
     with requests.Session() as s:                                           # Для сохранения сессии
         s.post('https://wiki.i-core.ru', headers=headers, data=data)        # Логинемся на сайт
-        link = get_pdf_link(get_html(url, s))
-        download_file(link, s)
+        for url in urls:
+            html = get_html(url, s)
+            link = get_pdf_link(html)
+            download_file(link[0], link[1], s)
 
 
 
 if __name__ == '__main__':
     main()
+    #input('ololo')
