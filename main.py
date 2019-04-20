@@ -20,6 +20,7 @@ url = 'https://wiki.i-core.ru/pages/viewpage.action?pageId=10551321'
 def loggin_to_site(url):
     s = requests.Session()                      # Для сохранения сессии
     s.post(url, headers=headers, data=data)     # Лонинемся на сайт
+    #print(a.headers)
     return s.get(url).text                      # Возвращает html страницу
 
 
@@ -30,9 +31,14 @@ def get_pdf_link(html):
     return 'https://wiki.i-core.ru' + link      # Возвращает url для скачивания PDF файла
 
 def download_file(url):
-    r = requests.get(url, stream=True)
+    s = requests.Session()                      # Для сохранения сессии
+    s.post(url, headers=headers, data=data)
+    r = s.get(url, stream=True)
 
-    with open('1.txt', 'bw') as f:
+    print(r.headers)
+    print(r.url)
+
+    with open('1.pdf', 'wb') as f:
         for chunk in r.iter_content(8192):
             f.write(chunk)
 
