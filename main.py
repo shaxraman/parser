@@ -1,8 +1,9 @@
-# v1.0
+# v1.1
 # Выдае url для скачивания файла
 # Не забыть ввести логин и пароль
 
 import requests
+import shutil
 from bs4 import BeautifulSoup
 from log import login, password
 
@@ -29,6 +30,15 @@ def get_pdf_link(html):
     # print('url for download pdf -', 'https://wiki.i-core.ru' + link)
     return 'https://wiki.i-core.ru' + link      # Возвращает url для скачивания PDF файла
 
+def download_file(url):
+    r = requests.get(url, stream=True)
+
+    with open('1.txt', 'bw') as f:
+        for chunk in r.iter_content(8192):
+            f.write(chunk)
 
 if __name__ == '__main__':
-    get_pdf_link(loggin_to_site(url))
+    logging = loggin_to_site(url)
+    link = get_pdf_link(logging)
+
+    download_file(link)
