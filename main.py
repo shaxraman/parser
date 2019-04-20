@@ -26,17 +26,13 @@ def get_html(url, session):
 def get_pdf_link(html):
     soup = BeautifulSoup(html, 'html.parser')
     link = soup.find('a', id='action-export-pdf-link', href=True).get('href')
-    title = soup.find('h1', id='title-text').getText().split()
-    #print(title)
-    #  print('url for download pdf -', 'https://wiki.i-core.ru' + link)
-    return ['https://wiki.i-core.ru' + link, title]     # Возвращает url для скачивания PDF файла
+    title = soup.find('h1', id='title-text').text
+    return ['https://wiki.i-core.ru' + link, title.split()]     # Возвращает url для скачивания PDF файла
 
 def download_file(url, title, session):
     r = session.get(url, stream=True)
-    #print(r.headers)
-    #print(r.url)
 
-    with open(f'{title}.pdf', 'wb') as f:
+    with open(f'{" ".join(title)}.pdf', 'wb') as f:
         for chunk in r.iter_content(8192):
             f.write(chunk)
 
@@ -49,7 +45,5 @@ def main():
             download_file(link[0], link[1], s)
 
 
-
 if __name__ == '__main__':
     main()
-    #input('ololo')
