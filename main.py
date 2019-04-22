@@ -1,33 +1,45 @@
-# v1.2
-# Уже может качать файл
-# Не забыть ввести логин и пароль
+# v1.3
+# author Nezamov S.
 
 import requests
 from bs4 import BeautifulSoup
-from log import login, password                         # Хранятся логины и пароли
 import datetime
 import os
+import getpass
 
-try:
-    now = datetime.datetime.now()
-    new_directory = f'wiki {now.day}-{now.month}-{now.year}'    # Создаем папку wiki + текущая дата
-    os.mkdir(f'./{new_directory}')
-except:
-    pass
-
+def login():
+    userName = input('Напишите Ваш логин ')
+    password = getpass.getpass()
+    if '@' in userName:
+        return userName[:userName.index('@')], password
+    elif '.i' in userName:
+        return userName[:userName.index('.i')], password
+    else:
+        return userName, password
+log = login()
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',
     }
-data = {'os_username': login,      # Логин
-        'os_password': password,   # Пароль
+data = {'os_username': log[0],      # Логин
+        'os_password': log[1],   # Пароль
         'login': 'Войти',
         'os_destination': '/index.action',
         }
 urls = []
-with open('url.txt') as f:
-    for i in f:
-        if 'wiki' in i:
-            urls.append(i.strip())
+
+now = datetime.datetime.now()
+new_directory = f'wiki {now.day}-{now.month}-{now.year}'    # Создаем папку wiki + текущая дата
+def create_dir():
+    try:
+        os.mkdir(f'./{new_directory}')
+    except:
+        pass
+
+def read_urls(name_file):
+    with open(name_file) as f:
+        for i in f:
+            if 'wiki' in i:
+                urls.append(i.strip())   # Собираем список url из сайта
 
 def get_html(url, session):
     return session.get(url).text                        # Возвращает html страницу
@@ -46,13 +58,23 @@ def download_file(url, title, session):
             f.write(chunk)
 
 def main():
+
+    create_dir()
+    read_urls('urls.txt')
     with requests.Session() as s:                                           # Для сохранения сессии
         s.post('https://wiki.i-core.ru', headers=headers, data=data)        # Логинемся на сайт
         for url in urls:
-            html = get_html(url, s)
-            link = get_pdf_link(html)
-            download_file(link[0], link[1], s)
+            try:
+                html = get_html(url, s)
+                try:
+                    link = get_pdf_link(html)
+                    download_file(link[0], link[1], s)
+                except:
+                    pass
+            except:
+                pass
 
 
 if __name__ == '__main__':
     main()
+    print('ready')
