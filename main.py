@@ -5,6 +5,15 @@
 import requests
 from bs4 import BeautifulSoup
 from log import login, password                         # Хранятся логины и пароли
+import datetime
+import os
+
+try:
+    now = datetime.datetime.now()
+    new_directory = f'wiki {now.day}-{now.month}-{now.year}'    # Создаем папку wiki + текущая дата
+    os.mkdir(f'./{new_directory}')
+except:
+    pass
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',
@@ -14,11 +23,11 @@ data = {'os_username': login,      # Логин
         'login': 'Войти',
         'os_destination': '/index.action',
         }
-urls = ['https://wiki.i-core.ru/pages/viewpage.action?pageId=10551321',
-    'https://wiki.i-core.ru/pages/viewpage.action?pageId=2916492',
-    'https://wiki.i-core.ru/pages/viewpage.action?pageId=4456476',
-    ]
-
+urls = []
+with open('url.txt') as f:
+    for i in f:
+        if 'wiki' in i:
+            urls.append(i.strip())
 
 def get_html(url, session):
     return session.get(url).text                        # Возвращает html страницу
@@ -32,7 +41,7 @@ def get_pdf_link(html):
 def download_file(url, title, session):
     r = session.get(url, stream=True)
 
-    with open(f'{" ".join(title)}.pdf', 'wb') as f:
+    with open(f'{new_directory}/{" ".join(title)}.pdf', 'wb') as f:
         for chunk in r.iter_content(8192):
             f.write(chunk)
 
